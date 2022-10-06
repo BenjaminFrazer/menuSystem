@@ -27,19 +27,33 @@ UI::UI(std::shared_ptr<MenuHandler> MenuHandler){
 }
 void UI::print(){
     if (ptrMH){
-        auto names = ptrMH->currentMenu->getNames();
-        // clear();
-        int height = maxLines+1;
-        int width = maxCols/2;
-        WINDOW *window = newwin(height, width, 0,0);
-        box(window,0,0);
-        wrefresh(window);
-        for(int i=0;i<names.size();i++){
-            auto string = names.at(i);
-            mvaddstr(i+1, 2, string.data());
-        };
-        mvaddch(1+ptrMH->currentMenu->getIdx(), 1, '>');
-        refresh();
+        switch (ptrMH->currentMenu->get_type()) {
+            case Item::SLIDER:
+                std::cout << "slider\n";
+                break;
+            case Item::CALLBACK:
+                std::cout << "callback\n";
+                break;
+            case Item::INVALID:
+                std::cout << "invalid\n";
+                break;
+            case Item::MENU:
+                auto current_menu = std::dynamic_pointer_cast<Menu>(ptrMH->currentMenu);
+                auto names = current_menu->getNames();
+                // clear();
+                int height = maxLines+1;
+                int width = maxCols/2;
+                WINDOW *window = newwin(height, width, 0,0);
+                box(window,0,0);
+                wrefresh(window);
+                for(uint i=0;i<names.size();i++){
+                    auto string = names.at(i);
+                    mvaddstr(i+1, 2, string.data());
+                };
+                mvaddch(1+current_menu->getIdx(), 1, '>');
+                refresh();
+                break;
+        }
     }
 }
 void UI::getInput(){

@@ -9,12 +9,11 @@
 
 class MenuHandler{
     public:
-        MenuHandler(std::shared_ptr<Menu>);
-        std::shared_ptr<Menu> currentMenu;
+        MenuHandler(std::shared_ptr<Item>);
+        std::shared_ptr<Item> currentMenu;
         void increment();
         void decrement();
         void enter();
-        void print();
         bool isActive;
     private:
         // void setQuitCb();

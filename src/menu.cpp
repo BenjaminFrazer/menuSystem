@@ -1,27 +1,31 @@
 #include "menu.h"
-
-Menu::Menu(std::shared_ptr<Menu> Parent){
+/**
+   * Sub menu constructor
+     * */
+Menu::Menu(std::shared_ptr<Menu> Parent, std::string Name){
+    name = Name;
     parent=Parent;
-    Item return_item{"GoBack",parent};
-    registerItem(return_item);
+    auto return_item = Parent;
+    registerMenuItem(return_item);
 }
-Menu::Menu(std::function<void()> quitCallback){// top level menu
-    Item return_item{"Quit",parent,true,quitCallback};
-    registerItem(return_item);
+/**
+   * Toplevel menu constructor */
+Menu::Menu(std::function<void()> quitCallback,std::string Name){// top level menu
+    name = Name;
+    auto return_item = std::make_shared<Callback>("Go Back",quitCallback);
+    registerMenuItem(return_item);
 }
 int Menu::getIdx(){
     return idx;
 }
 
-bool Menu::getIsCallback(){
-    return items.at(idx).isCallback;
+const std::vector<std::string>& Menu::getNames(){
+    return names;
 }
-std::function<void()> Menu::getSelectedCallback(){
-    return items.at(idx).callback;
-}
-void Menu::registerItem(Item item){
-    items.push_back(item);
-    names.push_back(item.name);
+
+void Menu::registerMenuItem(std::shared_ptr<Item> item){
+    items_list.push_back(item);
+    names.push_back(item->get_name());
     len++;
 }
 
@@ -34,26 +38,21 @@ void Menu::decrement(){
     if(idx==0){idx = len-1;}
     else{idx--;}
 };
-
-std::shared_ptr<Menu> Menu::getSelectedSubMenu(){
-    return items.at(idx).child;
+/**
+   *Returns an item of some description w */
+std::shared_ptr<Item> Menu::enter(std::shared_ptr<Item> Caller){
+    return items_list.at(idx);
 }
 
-std::string Menu::getSelectedSubMenuName(){
-    return items.at(idx).name;
+Callback::Callback(std::string Name, std::function<void()> Callback){
+    name = Name;
+    cb = Callback;
 }
-void Menu::print(){
-    for(int lp_idx=0; lp_idx<items.size();lp_idx++){
-        if(lp_idx==idx){
-            std::cout << items.at(lp_idx).name << "<\n";}
-        else{
-            std::cout << items.at(lp_idx).name << "\n";}
-        }
-    if(true){
-        std::cout << " idx:" << (int)idx << " len:" << (int)len << "\n";
-    }
-    }
+/*
+** returns pointer to itself
+   */
+std::shared_ptr<Item> Callback::enter(std::shared_ptr<Item> Caller){
+    cb();
+    return static_cast<std::shared_ptr<Item>>(shared_from_this());
+}
 
-const std::vector<std::string>& Menu::getNames(){
-    return names;
-}
