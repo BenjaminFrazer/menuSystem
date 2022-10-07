@@ -1,4 +1,5 @@
 #include "menu.h"
+#include <memory>
 /**
    * Sub menu constructor
      * */
@@ -40,8 +41,19 @@ void Menu::decrement(){
 };
 /**
    *Returns an item of some description w */
-std::shared_ptr<Item> Menu::enter(std::shared_ptr<Item> Caller){
-    return items_list.at(idx);
+std::shared_ptr<Item> Menu::enter(){
+    auto Caller = static_cast<std::shared_ptr<Item>>(shared_from_this());
+    switch (items_list.at(idx)->get_type()) {
+        case Item::MENU:
+            return items_list.at(idx);
+        case Item::CALLBACK:
+            std::dynamic_pointer_cast<Callback>(items_list.at(idx))->cb();
+            return Caller;
+        case Item::SLIDER:
+            return items_list.at(idx);
+        default:
+            return Caller;
+    }
 }
 
 Callback::Callback(std::string Name, std::function<void()> Callback){
@@ -51,7 +63,7 @@ Callback::Callback(std::string Name, std::function<void()> Callback){
 /*
 ** returns pointer to itself
    */
-std::shared_ptr<Item> Callback::enter(std::shared_ptr<Item> Caller){
+std::shared_ptr<Item> Callback::enter(){
     cb();
     return static_cast<std::shared_ptr<Item>>(shared_from_this());
 }
